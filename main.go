@@ -1,5 +1,3 @@
-// Writing a basic HTTP server is easy using the
-// `net/http` package.
 package main
 
 import "fmt"

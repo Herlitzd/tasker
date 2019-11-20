@@ -41,7 +41,6 @@ func (t Task) Execute() *TaskResult {
 		command.Args = []string{t.Args}
 	}
 
-	// command.Stdin = strings.NewReader(t.Script)
 	var out bytes.Buffer
 	command.Stdout = &out
 	err := command.Run()
