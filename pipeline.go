@@ -30,9 +30,7 @@ func (p *Pipeline) Begin() {
 	if p.Task != nil {
 		p.TaskResult = p.Task.Execute()
 		switch {
-		case p.TaskResult.Error == nil:
-			fallthrough
-		case p.ForceSuccess:
+		case p.TaskResult.Error == nil, p.ForceSuccess:
 			if p.OnSuccess != nil {
 				p.OnSuccess.Begin()
 			}
