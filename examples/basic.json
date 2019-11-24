@@ -1,0 +1,43 @@
+{
+  "Tasks": {
+    "List": {
+      "Name": "Do List",
+      "Program": "ls",
+      "Args": [
+        "-al"
+      ]
+    },
+    "WorkingDir": {
+      "Name": "Do Working Directory",
+      "Program": "pwd"
+    },
+    "Print": {
+      "Name": "cat main",
+      "Program": "cat",
+      "Args": [
+        "main.go"
+      ]
+    }
+  },
+  "Pipelines": {
+    "Main": {
+      "Start": "Primary",
+      "Steps": [
+        {
+          "Name": "Primary",
+          "Task": "List",
+          "OnSuccess": "Secondary"
+        },
+        {
+          "Name": "Secondary",
+          "Task": "WorkingDir",
+          "OnSuccess": "Tertiary"
+        },
+        {
+          "Name": "Tertiary",
+          "Task": "Print"
+        }
+      ]
+    }
+  }
+}

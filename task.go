@@ -1,56 +1,49 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os/exec"
 )
 
 type Task struct {
-	Name    string
-	Args    string
-	Program string
-	Script  string
+	Description string
+	Args        []string
+	Program     string
 }
 
 type TaskResult struct {
-	Output   *string
-	Error    *string
-	BaseTask *Task
+	Output    *string
+	IsSuccess bool
+	BaseTask  *Task
 }
 
 func (t Task) String() string {
-	return fmt.Sprintf("%v:\n> %v %v\n%v\n", t.Name, t.Program, t.Args, t.Script)
+
+	argString := ""
+	for _, arg := range t.Args {
+		argString += arg + " "
+	}
+
+	return fmt.Sprintf("%v:\n> %v %s\n", t.Description, t.Program, argString)
 }
 
 func (t TaskResult) String() string {
-	empty := ""
-	if t.Error == nil {
-		t.Error = &empty
-	}
-	if t.Output == nil {
-		t.Error = &empty
-	}
-
-	return fmt.Sprintf("Task:\nName:\n%v\nOutput:\n%s\n%s", t.BaseTask, *t.Output, *t.Error)
+	return fmt.Sprintf("Task:\nDescription:\n%v\nSuccess:%v\nOutput:\n%s", t.BaseTask, t.IsSuccess, *t.Output)
 }
 
 func (t Task) Execute() *TaskResult {
-	command := exec.Command(t.Program)
-	if t.Args != "" {
-		command.Args = []string{t.Args}
-	}
+	command := exec.Command(t.Program, t.Args...)
 
-	var out bytes.Buffer
-	command.Stdout = &out
-	err := command.Run()
+	stdoutStderr, err := command.CombinedOutput()
 
-	output := out.String()
+	output := string(stdoutStderr)
 	result := TaskResult{BaseTask: &t, Output: &output}
 
 	if err != nil {
-		errorString := err.Error()
-		result.Error = &errorString
+		result.IsSuccess = false
+	} else {
+		result.IsSuccess = true
 	}
+
 	return &result
 }
