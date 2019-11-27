@@ -1,0 +1,1 @@
+docker run --rm -it --entrypoint "/bin/sh" tasker:0.0.1
