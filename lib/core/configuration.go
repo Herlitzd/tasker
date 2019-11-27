@@ -1,4 +1,4 @@
-package main
+package core
 
 type Config struct {
 	Tasks     map[string]Task
@@ -6,8 +6,9 @@ type Config struct {
 }
 
 type PipelineConfig struct {
-	Start string
-	Steps []PipelineStep
+	Start    string
+	Executor string
+	Steps    []PipelineStep
 }
 
 type PipelineStep struct {

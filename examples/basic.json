@@ -21,6 +21,7 @@
   },
   "Pipelines": {
     "Main": {
+      "Executor": "Local",
       "Start": "Primary",
       "Steps": [
         {

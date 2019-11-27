@@ -5,36 +5,47 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	tasker "github.com/Herlitzd/tasker/lib/core"
+	executors "github.com/Herlitzd/tasker/lib/executors"
 )
 
-func GetConfig(path string) map[string]*Pipeline {
+func getConfig(path string) map[string]*tasker.Pipeline {
 	jsonFile, err := os.Open(path)
 	defer jsonFile.Close()
 	if err != nil {
 		fmt.Println(err)
 	}
-	byteJson, _ := ioutil.ReadAll(jsonFile)
-	var config Config
+	byteJSON, _ := ioutil.ReadAll(jsonFile)
+	var config tasker.Config
 
-	json.Unmarshal(byteJson, &config)
+	json.Unmarshal(byteJSON, &config)
 
-	runConfig := BuildRunConfig(&config)
+	runConfig := buildRunConfig(&config)
 
 	return runConfig
 }
 
-func BuildRunConfig(config *Config) map[string]*Pipeline {
+func getExecutor(value *string) tasker.Executor {
+	return &executors.Local{}
+}
 
-	runConfig := make(map[string]*Pipeline)
+func buildRunConfig(config *tasker.Config) map[string]*tasker.Pipeline {
+
+	runConfig := make(map[string]*tasker.Pipeline)
 
 	for pipelineName, pipelineMap := range config.Pipelines {
-		pipelineSteps := make(map[string]*Pipeline)
+		pipelineSteps := make(map[string]*tasker.Pipeline)
 
+		executor := getExecutor(&pipelineMap.Executor)
+
+		// Create pipelinesSteps for each known step
 		for _, stepStruct := range pipelineMap.Steps {
 			task := config.Tasks[stepStruct.Task]
-			pipelineSteps[stepStruct.Name] = &Pipeline{Task: &task, ForceSuccess: stepStruct.ForceSuccess}
+			pipelineSteps[stepStruct.Name] = &tasker.Pipeline{Task: &task, Executor: executor, ForceSuccess: stepStruct.ForceSuccess}
 		}
 
+		// Link the pipelinesSteps together
 		for _, stepStruct := range pipelineMap.Steps {
 			pipelineSteps[stepStruct.Name].OnSuccess = pipelineSteps[stepStruct.OnSuccess]
 			pipelineSteps[stepStruct.Name].OnFail = pipelineSteps[stepStruct.OnFail]
@@ -47,7 +58,7 @@ func BuildRunConfig(config *Config) map[string]*Pipeline {
 
 func main() {
 	argsWithProg := os.Args[1:]
-	config := GetConfig(argsWithProg[0])
+	config := getConfig(argsWithProg[0])
 	p := config[argsWithProg[1]]
 	p.Begin()
 	fmt.Print(p.String())

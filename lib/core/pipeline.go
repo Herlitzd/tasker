@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ type Pipeline struct {
 	OnSuccess    *Pipeline
 	OnFail       *Pipeline
 	ForceSuccess bool
+	Executor     Executor
 }
 
 func (p Pipeline) String() string {
@@ -28,7 +29,7 @@ func (p Pipeline) String() string {
 
 func (p *Pipeline) Begin() {
 	if p.Task != nil {
-		p.TaskResult = p.Task.Execute()
+		p.TaskResult = p.Executor.Execute(p.Task)
 		switch {
 		case p.TaskResult.IsSuccess, p.ForceSuccess:
 			if p.OnSuccess != nil {
